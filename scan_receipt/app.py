@@ -10,93 +10,95 @@ load_dotenv("env/.env")
 
 dify_api_key = DifyApiKeySettings()
 # DIFY_API_KEY = os.environ.get('DIFY_API_KEY')
-DIFY_BASE_URL = 'http://localhost/v1'
-DIFY_USER = "Kazuki"
 
-def upload_file(file):
-    target_url = f"{DIFY_BASE_URL}/files/upload"
+class DifyModule:
+    DIFY_BASE_URL = 'http://localhost/v1'
+    DIFY_USER = "Kazuki"
 
-    headers = {
-        "Authorization": f"Bearer {dify_api_key.csv_to_json}",
-    }
+    def upload_file(self, file):
+        target_url = f"{self.DIFY_BASE_URL}/files/upload"
 
-    try:
-        response = requests.post(
-            target_url,
-            headers=headers,
-            files={"file": (file.name, file.read(), file.type)},
-            data={"user": DIFY_USER},
-        )
+        headers = {
+            "Authorization": f"Bearer {dify_api_key.csv_to_json}",
+        }
 
-        if response.status_code == 201:
-            return response.json()
-        else:
-            st.error(f"アップロードエラー: {response.status_code}")
+        try:
+            response = requests.post(
+                target_url,
+                headers=headers,
+                files={"file": (file.name, file.read(), file.type)},
+                data={"user": self.DIFY_USER},
+            )
+
+            if response.status_code == 201:
+                return response.json()
+            else:
+                st.error(f"アップロードエラー: {response.status_code}")
+                return None
+
+        except Exception as e:
+            st.error(f"予期しないエラーが発生しました: {str(e)}")
             return None
 
-    except Exception as e:
-        st.error(f"予期しないエラーが発生しました: {str(e)}")
-        return None
 
-
-def convert_csv_to_json(file_id: str) -> str:
-    '''xのブックマークのcsvファイルをJson形式に変換'''
-    target_url = f"{DIFY_BASE_URL}/workflows/run"
-    headers = {
-        "Authorization": f"Bearer {dify_api_key.csv_to_json}",
-        "Content-Type": "application/json"
-    }
-
-    input = {
-        # Dify ワークフローの入力フィールド名と一致させる
-        "bookmark_csv": {
-            "type": "document",
-            "transfer_method": "local_file",
-            "upload_file_id": file_id
+    def convert_csv_to_json(self, file_id: str) -> str:
+        '''xのブックマークのcsvファイルをJson形式に変換'''
+        target_url = f"{self.DIFY_BASE_URL}/workflows/run"
+        headers = {
+            "Authorization": f"Bearer {dify_api_key.csv_to_json}",
+            "Content-Type": "application/json"
         }
-    }
 
-    payload = {
-        "inputs": input,
-        "response_mode": "blocking",
-        "user": DIFY_USER
-    }
+        input = {
+            # Dify ワークフローの入力フィールド名と一致させる
+            "bookmark_csv": {
+                "type": "document",
+                "transfer_method": "local_file",
+                "upload_file_id": file_id
+            }
+        }
 
-    try:
-        response = requests.post(target_url, headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"ワークフロー実行エラー: {str(e)}")
-        return None
+        payload = {
+            "inputs": input,
+            "response_mode": "blocking",
+            "user": self.DIFY_USER
+        }
+
+        try:
+            response = requests.post(target_url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            st.error(f"ワークフロー実行エラー: {str(e)}")
+            return None
 
 
-def categorized_json(bookmark_json: str) -> str:
-    '''xのブックマークのJsonファイルをカテゴリごとに分類'''
-    target_url = f"{DIFY_BASE_URL}/workflows/run"
-    headers = {
-        "Authorization": f"Bearer {dify_api_key.categorize_json}",
-        "Content-Type": "application/json"
-    }
+    def categorized_json(self, bookmark_json: str) -> str:
+        '''xのブックマークのJsonファイルをカテゴリごとに分類'''
+        target_url = f"{self.DIFY_BASE_URL}/workflows/run"
+        headers = {
+            "Authorization": f"Bearer {dify_api_key.categorize_json}",
+            "Content-Type": "application/json"
+        }
 
-    input = {
-        # Dify ワークフローの入力フィールド名と一致させる
-        "bookmark_json": bookmark_json
-    }
+        input = {
+            # Dify ワークフローの入力フィールド名と一致させる
+            "bookmark_json": bookmark_json
+        }
 
-    payload = {
-        "inputs": input,
-        "response_mode": "blocking",
-        "user": DIFY_USER
-    }
+        payload = {
+            "inputs": input,
+            "response_mode": "blocking",
+            "user": self.DIFY_USER
+        }
 
-    try:
-        response = requests.post(target_url, headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"ワークフロー実行エラー: {str(e)}")
-        return None
+        try:
+            response = requests.post(target_url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            st.error(f"ワークフロー実行エラー: {str(e)}")
+            return None
 
 
 
