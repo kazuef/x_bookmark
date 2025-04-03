@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import ast
 from dotenv import load_dotenv
 import streamlit as st
 from config import DifyApiKeySettings
@@ -38,7 +39,7 @@ def upload_file(file):
         return None
 
 
-def convert_csv_to_json(file_id):
+def convert_csv_to_json(file_id: str) -> str:
     '''xのブックマークのcsvファイルをJson形式に変換'''
     target_url = f"{DIFY_BASE_URL}/workflows/run"
     headers = {
@@ -70,7 +71,7 @@ def convert_csv_to_json(file_id):
         return None
 
 
-def categorized_json(file_id):
+def categorized_json(bookmark_json: str) -> str:
     '''xのブックマークのJsonファイルをカテゴリごとに分類'''
     target_url = f"{DIFY_BASE_URL}/workflows/run"
     headers = {
@@ -80,11 +81,7 @@ def categorized_json(file_id):
 
     input = {
         # Dify ワークフローの入力フィールド名と一致させる
-        "bookmark_csv": {
-            "type": "document",
-            "transfer_method": "local_file",
-            "upload_file_id": file_id
-        }
+        "bookmark_json": bookmark_json
     }
 
     payload = {
@@ -110,7 +107,8 @@ uploaded_file = st.file_uploader(
     type=["csv", "json"]
 )
 
-print(uploaded_file)
+# print(f"type(uploaded_file): \n{type(uploaded_file)}\nEnd")
+# print(f"uploaded_file: \n{uploaded_file}\nEnd")
 
 # if uploaded_file is not None:
 #     col1, col2 = st.columns(2)
@@ -127,29 +125,33 @@ if st.button("ファイルをアップロード"):
         with st.spinner("ワークフローを実行中..."):
             run_workflow_result = convert_csv_to_json(response["id"])
         
-        bookmarks_json = run_workflow_result["data"]["outputs"]["bookmarks_json"]
+        bookmarks_json_list = run_workflow_result["data"]["outputs"]["bookmarks_json"]
 
     elif uploaded_file.type == "application/json":
         bookmarks_json_str = uploaded_file.getvalue().decode("utf-8")
-        bookmarks_json = json.loads(bookmarks_json_str)
+        bookmarks_json_list = json.loads(bookmarks_json_str)
 
-    # for bookmark_json in bookmarks_json:
+    with st.spinner("ワークフローを実行中..."):
+        # run_workflow_result = categorized_json(bookmark_json_str)
+        run_workflow_result_list = []
+        for bookmark_json in bookmarks_json_list:
+            # print(f"type(bookmark_json): \n{type(bookmark_json)}\nEnd")
+            bookmark_json_str = json.dumps(bookmark_json, ensure_ascii=False)
+            # print(f"len(bookmark_json_str): \n{len(bookmark_json_str)}\nEnd")
+            run_workflow_result = categorized_json(bookmark_json_str)
+            run_workflow_result_list.append(run_workflow_result)
         
+    # st.write(run_workflow_result_list)
 
-
-
-    # print("########################")
-    # print(bookmark_json_str)
-    # print("########################")
-    # bookmark_json = json.loads(bookmark_json_str)
-
-    # print("########################")
-    # print(bookmark_json)
-    # print("########################")
+    categorized_bookmark_json_list = []
+    for i in range(0, len(run_workflow_result_list)-1):
+        # 理想の形 → {"分類項目1": {"LLM": {bookmarkの中身}}}
+        categorized_bookmark_json_result = run_workflow_result_list[i]["data"]["outputs"]["categorized_bookmark_json"]
+        categorized_bookmark_json = json.loads(categorized_bookmark_json_result)["分類項目"]
+        categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
     
-    # レスポンスから画像の解析結果を取得して表示
-    # st.write(bookmark_json["bookmarks"])
-    st.write(bookmarks_json)
+    st.write(categorized_bookmark_json_list)
+
 
 
     
