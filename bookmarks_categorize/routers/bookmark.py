@@ -1,13 +1,13 @@
 import ast
 import json
-from fastapi import FastAPI, File, UploadFile
-from app import DifyModule
+from fastapi import APIRouter, File, UploadFile
+from modules.bookmark import DifyModule
 
-app = FastAPI()
+router = APIRouter()
 
 difyModule = DifyModule()
 
-@app.post("/bookmarks/categorize")
+@router.post("/bookmarks/categorize")
 async def categorize_bookmarks(file: UploadFile = File(...)):
     # ファイルの内容を読み込む
     content = await file.read()
@@ -23,11 +23,11 @@ async def categorize_bookmarks(file: UploadFile = File(...)):
 
     #　分類結果をbookmark_jsonと統合
     categorized_bookmark_json_list = []
-    for i in range(0, len(run_workflow_result_list)-1):
+    for i in range(len(run_workflow_result_list)):
         # 理想の形 → {"分類項目1": {"LLM": {bookmarkの中身}}}
         categorized_bookmark_json_result = run_workflow_result_list[i]["data"]["outputs"]["categorized_bookmark_json"]
         categorized_bookmark_json = json.loads(categorized_bookmark_json_result)["分類項目"]
-        categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
+        categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i+1}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
 
     return categorized_bookmark_json_list
     #     json_string = json.dumps(json_content, ensure_ascii=False, indent=2)
