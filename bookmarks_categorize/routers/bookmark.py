@@ -7,7 +7,7 @@ router = APIRouter()
 
 difyModule = DifyModule()
 
-@router.post("/bookmarks/categorize")
+@router.post("/categorize")
 async def categorize_bookmarks(file: UploadFile = File(...)):
     # ファイルの内容を読み込む
     content = await file.read()
@@ -27,7 +27,8 @@ async def categorize_bookmarks(file: UploadFile = File(...)):
         # 理想の形 → {"分類項目1": {"LLM": {bookmarkの中身}}}
         categorized_bookmark_json_result = run_workflow_result_list[i]["data"]["outputs"]["categorized_bookmark_json"]
         categorized_bookmark_json = json.loads(categorized_bookmark_json_result)["分類項目"]
-        categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i+1}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
+        categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"bookmark_category\": \"{categorized_bookmark_json}\", " + f"\"tweet_content\": {bookmarks_json_list[i]}" + "}"))
+        # categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i+1}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
 
     return categorized_bookmark_json_list
     #     json_string = json.dumps(json_content, ensure_ascii=False, indent=2)
