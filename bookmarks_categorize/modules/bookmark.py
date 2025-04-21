@@ -4,7 +4,7 @@ import json
 import ast
 from dotenv import load_dotenv
 import streamlit as st
-from config import DifyApiKeySettings
+from ..config import DifyApiKeySettings
 
 load_dotenv("env/.env")
 
