@@ -104,55 +104,55 @@ class DifyModule:
 
 # 実行プロック
 
-uploaded_file = st.file_uploader(
-    "ファイルをアップロードしてください",
-    type=["csv", "json"]
-)
+# uploaded_file = st.file_uploader(
+#     "ファイルをアップロードしてください",
+#     type=["csv", "json"]
+# )
 
-# print(f"type(uploaded_file): \n{type(uploaded_file)}\nEnd")
-# print(f"uploaded_file: \n{uploaded_file}\nEnd")
+# # print(f"type(uploaded_file): \n{type(uploaded_file)}\nEnd")
+# # print(f"uploaded_file: \n{uploaded_file}\nEnd")
 
-# if uploaded_file is not None:
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         st.write("ファイル名:", uploaded_file.name)
-    # with col2:
-    #     st.image(uploaded_file, use_container_width=True)
+# # if uploaded_file is not None:
+# #     col1, col2 = st.columns(2)
+# #     with col1:
+# #         st.write("ファイル名:", uploaded_file.name)
+#     # with col2:
+#     #     st.image(uploaded_file, use_container_width=True)
 
-if st.button("ファイルをアップロード"):
-    if uploaded_file.type == "text/csv":
-        response = upload_file(uploaded_file)
-        st.write(f'アップロード完了: ファイルID - {response["id"]}')
+# if st.button("ファイルをアップロード"):
+#     if uploaded_file.type == "text/csv":
+#         response = upload_file(uploaded_file)
+#         st.write(f'アップロード完了: ファイルID - {response["id"]}')
 
-        with st.spinner("ワークフローを実行中..."):
-            run_workflow_result = convert_csv_to_json(response["id"])
+#         with st.spinner("ワークフローを実行中..."):
+#             run_workflow_result = convert_csv_to_json(response["id"])
         
-        bookmarks_json_list = run_workflow_result["data"]["outputs"]["bookmarks_json"]
+#         bookmarks_json_list = run_workflow_result["data"]["outputs"]["bookmarks_json"]
 
-    elif uploaded_file.type == "application/json":
-        bookmarks_json_str = uploaded_file.getvalue().decode("utf-8")
-        bookmarks_json_list = json.loads(bookmarks_json_str)
+#     elif uploaded_file.type == "application/json":
+#         bookmarks_json_str = uploaded_file.getvalue().decode("utf-8")
+#         bookmarks_json_list = json.loads(bookmarks_json_str)
 
-    with st.spinner("ワークフローを実行中..."):
-        # run_workflow_result = categorized_json(bookmark_json_str)
-        run_workflow_result_list = []
-        for bookmark_json in bookmarks_json_list:
-            # print(f"type(bookmark_json): \n{type(bookmark_json)}\nEnd")
-            bookmark_json_str = json.dumps(bookmark_json, ensure_ascii=False)
-            # print(f"len(bookmark_json_str): \n{len(bookmark_json_str)}\nEnd")
-            run_workflow_result = categorized_json(bookmark_json_str)
-            run_workflow_result_list.append(run_workflow_result)
+#     with st.spinner("ワークフローを実行中..."):
+#         # run_workflow_result = categorized_json(bookmark_json_str)
+#         run_workflow_result_list = []
+#         for bookmark_json in bookmarks_json_list:
+#             # print(f"type(bookmark_json): \n{type(bookmark_json)}\nEnd")
+#             bookmark_json_str = json.dumps(bookmark_json, ensure_ascii=False)
+#             # print(f"len(bookmark_json_str): \n{len(bookmark_json_str)}\nEnd")
+#             run_workflow_result = categorized_json(bookmark_json_str)
+#             run_workflow_result_list.append(run_workflow_result)
         
-    # st.write(run_workflow_result_list)
+#     # st.write(run_workflow_result_list)
 
-    categorized_bookmark_json_list = []
-    for i in range(0, len(run_workflow_result_list)-1):
-        # 理想の形 → {"分類項目1": {"LLM": {bookmarkの中身}}}
-        categorized_bookmark_json_result = run_workflow_result_list[i]["data"]["outputs"]["categorized_bookmark_json"]
-        categorized_bookmark_json = json.loads(categorized_bookmark_json_result)["分類項目"]
-        categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
+#     categorized_bookmark_json_list = []
+#     for i in range(0, len(run_workflow_result_list)-1):
+#         # 理想の形 → {"分類項目1": {"LLM": {bookmarkの中身}}}
+#         categorized_bookmark_json_result = run_workflow_result_list[i]["data"]["outputs"]["categorized_bookmark_json"]
+#         categorized_bookmark_json = json.loads(categorized_bookmark_json_result)["分類項目"]
+#         categorized_bookmark_json_list.append(ast.literal_eval("{ " + f"\"分類項目{i}\": " + "{" + f"\"{categorized_bookmark_json}\": {bookmarks_json_list[i]}" + "} }"))
     
-    st.write(categorized_bookmark_json_list)
+#     st.write(categorized_bookmark_json_list)
 
 
 

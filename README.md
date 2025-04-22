@@ -56,6 +56,8 @@ init_db()
 
 ### サーバーの起動
 
+main.py が配置されている階層(bookmarks_categorize)で以下コマンドを実行してください：
+
 ```bash
 poetry run uvicorn bookmarks_categorize.main:app --reload
 ```

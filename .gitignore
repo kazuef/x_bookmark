@@ -1,3 +1,6 @@
 bookmarks_categorize/env/.env
 __pycache__
 repomix-output.xml
+bookmarks_categorize/db/
+db/
+*.db
