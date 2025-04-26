@@ -1,7 +1,19 @@
 import sqlite3, os
+from contextlib import contextmanager
 
 base_path = os.path.dirname(__file__)
 db_path = os.path.join(base_path, "../db/bookmarks.db")
+
+@contextmanager
+def get_connection():
+    """
+    DB への接続を取得し、処理後に必ずクローズするコンテキストマネージャー
+    """
+    conn = sqlite3.connect(db_path)
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 def init_db():
     # dbディレクトリが存在しない場合は作成

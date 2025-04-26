@@ -38,10 +38,10 @@ async def categorize_bookmarks(file: UploadFile = File(...)):
             category_name = item["bookmark_category"]
             tweet = item["tweet_content"]
             
-            # 1) カテゴリ登録 or 取得
+            # 1. カテゴリ登録 or 取得
             cat_id = get_or_create_category(category_name)
             
-            # 2) Bookmark 登録（tweet の中にユニークIDが含まれている前提）
+            # 2. Bookmark 登録（tweet の中にユニークIDが含まれている前提）
             bookmark_id = str(uuid.uuid4())
             insert_bookmark(bookmark_id, cat_id, tweet)
     except Exception as e:
